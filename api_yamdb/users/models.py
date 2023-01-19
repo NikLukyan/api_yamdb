@@ -12,32 +12,37 @@ class User(AbstractUser):
         ('ADMIN', 'admin'),
     ]
     username = models.CharField(
+        'Логин',
         max_length=150,
         db_index=True,
         unique=True,
-        verbose_name='Логин',
     )
     email = models.EmailField(
+        'Эл. адрес',
         max_length=254,
         db_index=True,
         unique=True,
-        verbose_name='Эл. адрес',
     )
     first_name = models.CharField(
         max_length=150,
         verbose_name='Имя',
+         blank=True,
     )
     last_name = models.CharField(
+        'Фамилия',
         max_length=150,
-        verbose_name='Фамилия',
+        blank=True,
     )
     bio = models.TextField(
+        'Биография',
         blank=True,
-        verbose_name='Биография',
     )
     role = models.CharField(
+        'Роль',
         choices=ROLE_CHOICES,
         max_length=10,
+        default='user',
+
     )
 
     class Meta:
@@ -58,3 +63,9 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == self.USER
+
+
+class ConfirmationCode(models.Model):
+    confirmation_code = models.CharField(max_length=32)
+    email = models.EmailField(max_length=254, unique=True)
+    code_date = models.DateTimeField(auto_now_add=True)
