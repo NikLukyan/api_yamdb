@@ -1,3 +1,5 @@
+
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -25,6 +27,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'api.apps.ApiConfig',
     'djoser'
+    'rest_framework_simplejwt',
+    'users',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -39,7 +44,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'api_yamdb.urls'
 
-TEMPLATES_DIR = BASE_DIR / 'templates'
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -86,6 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
 
@@ -118,5 +124,8 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-  'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    # Устанавливаем срок жизни токена
+   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+   'AUTH_HEADER_TYPES': ('Bearer',),
+   'ROTATE_REFRESH_TOKENS': True,
 }
