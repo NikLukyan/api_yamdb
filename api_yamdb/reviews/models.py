@@ -5,7 +5,10 @@ from django.db import models
 # from api_yamdb.user.models import User
 
 
-class Review(models.Model):
+
+
+
+class Reviews(models.Model):
     SCORE_CHOICES = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
                      (8, 8), (9, 9), (10, 10), ]
     author = models.IntegerField('Номер пользователя')
@@ -28,3 +31,4 @@ class Comment(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
