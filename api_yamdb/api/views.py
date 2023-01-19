@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
-from api.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title
 from api.permissions import IsAdminUserOrReadOnly
 from api.serializers import (
     GenreSerializer,
@@ -31,14 +31,4 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve' or self.action == 'list':
             return TitleReadSerializer
         return TitleWriteSerializer
-
-
-# def main():
-#     with open(.csv) as f:
-#         for line in f:
-#             process(line)
-#     pass
-#
-# if __name__=='__main__':
-#     main()
 
