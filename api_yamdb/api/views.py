@@ -11,10 +11,13 @@ from api.serializers import (
     TitleWriteSerializer
 )
 
+
 class GenresViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # filter_backends = [filters.SearchFilter]
+    permission_classes = (IsAdminUserOrReadOnly,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'slug']
     lookup_field = 'slug'
 
 
