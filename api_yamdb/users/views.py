@@ -41,11 +41,13 @@ class SignUpAPIView(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     """представление для модели User"""
-    serialiser_class = UserSerializer
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
     permission_classes = (IsAdmin, )
     search_fields = ('=username', )
     lookup_field = 'username'
-    queryset = User.objects.all()
+
     
     @action(
         methods=['GET', 'PATCH'],
