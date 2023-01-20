@@ -129,3 +129,5 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
    'ROTATE_REFRESH_TOKENS': True,
 }
+
+EMAIL_ADMIN = 'admin@yandex.ru'

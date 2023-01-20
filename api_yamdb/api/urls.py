@@ -6,6 +6,7 @@ from api.views import (TitlesViewSet,
                        GenresViewSet,
                        CategoryViewSet,
                        ReviewViewSet)
+from users.views import JWTTokenAPIView, SignUpAPIView, UserViewSet
 
 app_name = 'api'
 
@@ -17,9 +18,13 @@ router.register('categories', CategoryViewSet, basename='categories')
 router.register(r'titles/(?P<title_id>\d+)/reviews',
                 ReviewViewSet,
                 basename='review')
+router.register('users', UserViewSet, basename='users')
+
 
 
 urlpatterns = [
     path('v1/', include(router.urls), name='api_v1'),
-    path('v1/auth/token', include('djoser.urls.jwt')),
+    path('v1/', include('users.urls')),
+    path('v1/auth/signup/', SignUpAPIView.as_view()),
+    path('v1/auth/token/', JWTTokenAPIView.as_view()),
 ]
