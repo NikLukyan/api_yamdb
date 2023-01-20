@@ -36,6 +36,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminUserOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'category', 'slug']
 
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'list':
