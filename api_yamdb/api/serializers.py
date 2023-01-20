@@ -8,16 +8,17 @@ from reviews.models import Genre, Category, Title, Reviews
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        # fields = '__all__'
         model = Genre
+        exclude = ['id']
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        # fields = '__all__'
         model = Category
-
+        exclude = ['id']
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -56,6 +57,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Reviews
         # read_only_fields = ("title",)
+
 
 
 

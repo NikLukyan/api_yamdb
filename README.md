@@ -1,65 +1,39 @@
-### api_yamdb
-### Как запустить проект :
+# API_FINAL_YATUBE
+## Описание
 
-Клонировать репозиторий и перейти в него в командной строке:
+Это социальная сеть, которая даст пользователям возможность создать учетную запись, публиковать записи, подписываться на любимых авторов и отмечать понравившиеся записи.
 
-```
-https://github.com/NikLukyan/api_yamdb.git
-```
+## Установка
 
-```
-cd api_yamdb
-```
+- Клонировать репозиторий и перейти в него в командной строке
+- Cоздать и активировать виртуальное окружение:
+    -python -m venv env
+    -source env/bin/activate
+    -python -m pip install --upgrade pip
+- Установить зависимости из файла requirements.txt:
+    -pip install -r requirements.txt
+- Выполнить миграции:
+   -python manage.py migrate
+- Запустить проект:
+    -python manage.py runserver
 
-Cоздать и активировать виртуальное окружение:
+## Примеры 
+from django.urls import include, path  
+from rest_framework.routers import DefaultRouter  
+from .views import (
+    GroupViewSet, PostViewSet, CommentViewSet, FollowViewSet
+)
 
-```
-python3 -m venv env
-```
-
-* Если у вас Linux/macOS
-
-    ```
-    source env/bin/activate
-    ```
-
-* Если у вас windows
-
-    ```
-    source env/scripts/activate
-    ```
-
-```
-python3 -m pip install --upgrade pip
-```
-
-Установить зависимости из файла requirements.txt:
-
-```
-pip install -r requirements.txt
-```
-
-Перейти в папку api_yamdb и выполнить миграции:
-
-```
-cd api_yamdb
-```
-
-```
-python3 manage.py migrate
-```
-
-Запустить проект:
-
-```
-python3 manage.py runserver
-```
-
-
-Когда вы запустите проект, по нижеуказанному адресу будет 
-доступна полная документация для API Yatube в формате Redoc: 
-```
-/redoc/
-```
-
-Некоторые примеры запросов к API:
+router = DefaultRouter()  
+router.register('posts', PostViewSet, basename='posts')  
+router.register('groups', GroupViewSet, basename='posts')  
+router.register('follow', FollowViewSet, basename='followers')  
+router.register(
+    r'posts/(?P<post_id>\d+)/comments', CommentViewSet,
+    basename='comments'
+)  
+urlpatterns = [  
+    path('v1/', include(router.urls)),  
+    path('v1/', include('djoser.urls')),  
+    path('v1/', include('djoser.urls.jwt')),  
+]
