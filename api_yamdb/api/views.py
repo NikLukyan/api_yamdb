@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from reviews.models import Category, Genre, Title
@@ -6,7 +7,8 @@ from api.serializers import (
     GenreSerializer,
     CategorySerializer,
     TitleReadSerializer,
-    TitleWriteSerializer
+    TitleWriteSerializer,
+    ReviewSerializer
 )
 
 
@@ -14,6 +16,7 @@ class GenresViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -32,3 +35,17 @@ class TitlesViewSet(viewsets.ModelViewSet):
             return TitleReadSerializer
         return TitleWriteSerializer
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        return title.reviews
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user,
+                        title=get_object_or_404(Title,
+                                                pk=self.kwargs["title_id"]))

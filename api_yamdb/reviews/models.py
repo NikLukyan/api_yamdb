@@ -1,12 +1,9 @@
-# from api_yamdb.api.models import Title
-# from api_yamdb.user.models import User
-
-from django.contrib.auth import get_user_model
 from django.db import models
-
+# from django.contrib.auth import get_user_model
 from api.validators import validate_year
+from users.models import User
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class Category(models.Model):
@@ -50,23 +47,30 @@ class Title(models.Model):
 class Reviews(models.Model):
     SCORE_CHOICES = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
                      (8, 8), (9, 9), (10, 10), ]
-    author = models.IntegerField('Номер пользователя')
-    # models.ForeignKey(
-    # User, on_delete=models.CASCADE, related_name='reviews')
-
-    # title = models.ForeignKey(
-    #     Title, on_delete=models.CASCADE, related_name='reviews')
-    text = models.TextField()
-    score = models.PositiveSmallIntegerField(choices=SCORE_CHOICES)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reviews')
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='reviews')
+    text = models.TextField('Отзыв')
+    score = models.PositiveSmallIntegerField('Оценка', choices=SCORE_CHOICES)
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        unique_together = ("title", "author")
 
 
 class Comment(models.Model):
-    # author = models.ForeignKey(
-    #     User, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Reviews, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField()
+    text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return self.text
