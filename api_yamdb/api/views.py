@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
-    # PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from reviews.models import Category, Genre, Title
 from rest_framework import filters
 from api.permissions import IsAdminUserOrReadOnly

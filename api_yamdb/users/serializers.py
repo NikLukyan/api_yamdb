@@ -3,7 +3,7 @@ from rest_framework import serializers
 from users.models import User, ConfirmationCode
 
 
-class SingUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор для создания пользователя"""
     class Meta:
         fields = ('email', 'username')
@@ -13,6 +13,18 @@ class SingUpSerializer(serializers.ModelSerializer):
         if value == 'me':
             raise serializers.ValidationError(
                 'Использовать имя "me" запрещено!'
+            )
+
+        email = value.get('email')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                f'Пользователь с email \'{email}\' уже существует.'
+            )
+        
+        username = value.get('username')
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                f'Пользователь \'{username}\' уже существует.'
             )
         return value
 
