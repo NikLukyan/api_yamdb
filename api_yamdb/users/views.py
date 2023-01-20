@@ -9,6 +9,7 @@ from users.serializers import UserSerializer, JWTTokenAPIViewSerializer
 
 class SingUpAPIView(APIView):
     """регистрация пользователя"""
+    pass
     permission_classes = (AllowAny,)
 
 
