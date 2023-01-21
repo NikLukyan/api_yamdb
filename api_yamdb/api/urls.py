@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 from api.views import (TitlesViewSet,
                        GenresViewSet,
                        CategoryViewSet,
-                       ReviewViewSet)
+                       ReviewViewSet,
+                       CommentViewSet)
 from users.views import JWTTokenAPIView, SignUpAPIView, UserViewSet
 
 app_name = 'api'
@@ -19,8 +20,9 @@ router.register(r'titles/(?P<title_id>\d+)/reviews',
                 ReviewViewSet,
                 basename='review')
 router.register('users', UserViewSet, basename='users')
-
-
+router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+                CommentViewSet,
+                basename='comment')
 
 urlpatterns = [
     path('v1/', include(router.urls), name='api_v1'),

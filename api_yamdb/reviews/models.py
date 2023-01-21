@@ -60,7 +60,11 @@ class Reviews(models.Model):
         return self.text
 
     class Meta:
-        unique_together = ("title", "author")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "title"], name="unique_review"
+            )
+        ]
 
 
 class Comment(models.Model):
@@ -68,6 +72,8 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
         Reviews, on_delete=models.CASCADE, related_name='comments')
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
