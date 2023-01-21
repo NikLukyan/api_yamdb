@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
@@ -27,10 +28,22 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = ('id',
+                  'name',
+                  'year',
+                  'rating',
+                  'description',
+                  'genre',
+                  'category')
         model = Title
+
+    def get_rating(self, obj):
+        return int(Reviews.objects.filter(title=obj).
+                   aggregate(Avg('score')).
+                   get("score__avg"))
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
