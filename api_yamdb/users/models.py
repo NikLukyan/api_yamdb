@@ -22,7 +22,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(
         'Эл. адрес',
-        max_length=254,
+        max_length=253,
         db_index=True,
         unique=True,
     )

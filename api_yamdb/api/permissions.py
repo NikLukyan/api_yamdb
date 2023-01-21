@@ -9,6 +9,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
             return request.user.is_admin
         return False
 
+
 class IsAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
