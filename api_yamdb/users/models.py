@@ -13,28 +13,11 @@ class User(AbstractUser):
         ('MODERATOR', 'moderator'),
         ('ADMIN', 'admin'),
     ]
-    username = models.CharField(
-        'Логин',
-        max_length=150,
-        db_index=True,
-        unique=True,
-        validators=[UsernameValidator('me'), ]
-    )
     email = models.EmailField(
         'Эл. адрес',
         max_length=253,
         db_index=True,
         unique=True,
-    )
-    first_name = models.CharField(
-        max_length=150,
-        verbose_name='Имя',
-        blank=True,
-    )
-    last_name = models.CharField(
-        'Фамилия',
-        max_length=150,
-        blank=True,
     )
     bio = models.TextField(
         'Биография',
