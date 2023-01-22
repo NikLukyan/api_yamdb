@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .validators import UsernameValidator
+
 
 class User(AbstractUser):
     USER = 'user'
@@ -16,6 +18,7 @@ class User(AbstractUser):
         max_length=150,
         db_index=True,
         unique=True,
+        validators=[UsernameValidator('me'), ]
     )
     email = models.EmailField(
         'Эл. адрес',
@@ -44,13 +47,6 @@ class User(AbstractUser):
         default='user',
 
     )
-    USERNAME_FIELD = 'email'
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-
 
     def __str__(self):
         return self.username
@@ -66,6 +62,11 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == self.USER
+    
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
 
 
 class ConfirmationCode(models.Model):

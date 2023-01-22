@@ -1,8 +1,10 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Genre, Category, Title, Reviews, Comment
+from reviews.models import Category, Comment, Genre, Reviews, Title
+from users.models import User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -27,10 +29,22 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = ('id',
+                  'name',
+                  'year',
+                  'rating',
+                  'description',
+                  'genre',
+                  'category')
         model = Title
+
+    def get_rating(self, obj):
+        return (Review.objects.filter(title=obj).
+                aggregate(Avg('score')).
+                get("score__avg"))
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -57,7 +71,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        model = Reviews
+        model = Review
         # validators = (UniqueTogetherValidator(
         #     queryset=Reviews.objects.all(),
         #     fields=('author', 'title'),
@@ -76,8 +90,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
-
-
 
 
 # class FollowSerializer(serializers.ModelSerializer):
@@ -106,3 +118,62 @@ class CommentSerializer(serializers.ModelSerializer):
 #             raise serializers.ValidationError(
 #                 'Нельзя подписаться на себя.')
 #         return value
+
+class SignUpSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания пользователя"""
+    class Meta:
+        fields = ('email', 'username')
+        model = User
+    
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя "me" запрещено!'
+            )
+
+        email = value.get('email')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                f'Пользователь с email \'{email}\' уже существует.'
+            )
+        
+        username = value.get('username')
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                f'Пользователь \'{username}\' уже существует.'
+            )
+        return value
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор модели User"""
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+    def validate_role(self, role):
+        req_user = self.context['request'].user
+        user = User.objects.get(username=req_user)
+        if user.is_user:
+            role = user.role
+        return role
+
+
+class JWTTokenAPIViewSerializer(serializers.ModelSerializer):
+    "Сериализатор данных для получения JWT токена"
+    username_field = User.email
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].required = False
+
+    def validate(self, attrs):
+        password = self.context['request'].data.get('confirmation_code')
+        attrs['password'] = password
+        return super().validate(attrs)

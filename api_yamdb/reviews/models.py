@@ -1,4 +1,4 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
 from api.validators import validate_year
@@ -45,15 +45,16 @@ class Title(models.Model):
         return self.name
 
 
-class Reviews(models.Model):
-    SCORE_CHOICES = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
-                     (8, 8), (9, 9), (10, 10), ]
+class Review(models.Model):
+    # SCORE_CHOICES = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
+    #                  (8, 8), (9, 9), (10, 10), ]
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField('Отзыв')
-    score = models.PositiveSmallIntegerField('Оценка', choices=SCORE_CHOICES)
+    score = models.PositiveSmallIntegerField(
+        'Оценка', validators=[MinValueValidator(1), MaxValueValidator(10)],)
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
@@ -74,7 +75,7 @@ class Comment(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
-        Reviews, on_delete=models.CASCADE, related_name='comments')
+        Review, on_delete=models.CASCADE, related_name='comments')
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField('Текст комментария')
