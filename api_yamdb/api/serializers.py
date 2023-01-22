@@ -9,7 +9,7 @@ from users.models import User
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        # fields = '__all__'
+
         model = Genre
         exclude = ['id']
 
@@ -17,7 +17,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        # fields = '__all__'
+
         model = Category
         exclude = ['id']
 
@@ -91,32 +91,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-# class FollowSerializer(serializers.ModelSerializer):
-#     user = SlugRelatedField(
-#         read_only=True, slug_field='username',
-#         default=serializers.CurrentUserDefault()
-#     )
-#     following = SlugRelatedField(
-#         queryset=User.objects.all(),
-#         slug_field='username'
-#     )
-#
-#     class Meta:
-#         model = Follow
-#         fields = ('user', 'following')
-#         validators = (
-#             UniqueTogetherValidator(
-#                 queryset=Follow.objects.all(),
-#                 fields=('user', 'following'),
-#                 message='Вы уже подписаны на этого автора.'
-#             ),
-#         )
-#
-#     def validate_following(self, value):
-#         if self.context['request'].user == value:
-#             raise serializers.ValidationError(
-#                 'Нельзя подписаться на себя.')
-#         return value
 
 class SignUpSerializer(serializers.ModelSerializer,  UserDataValidation):
     """Сериализатор для создания пользователя"""
