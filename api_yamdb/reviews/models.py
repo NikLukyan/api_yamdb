@@ -1,9 +1,10 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
 from api.validators import validate_year
 from users.models import User
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class Category(models.Model):
@@ -55,6 +56,8 @@ class Reviews(models.Model):
     score = models.PositiveSmallIntegerField('Оценка', choices=SCORE_CHOICES)
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
+
 
     def __str__(self):
         return self.text
