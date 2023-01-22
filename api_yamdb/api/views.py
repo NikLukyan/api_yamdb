@@ -7,8 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from django.core.mail import send_mail
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from reviews.models import Category, Genre, Title, Reviews, Comment
+from rest_framework.pagination import LimitOffsetPagination, \
+    PageNumberPagination
+from reviews.models import Category, Genre, Title, Review, Comment
 from rest_framework import filters
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
@@ -24,7 +25,8 @@ from api.serializers import (
 )
 
 
-from .serializers import UserSerializer, JWTTokenAPIViewSerializer, SignUpSerializer
+from .serializers import UserSerializer, JWTTokenAPIViewSerializer, \
+    SignUpSerializer
 from .permissions import IsAdmin
 from users.models import User
 
@@ -68,7 +70,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return Reviews.objects.filter(title=title)  # title.reviews
+        return Review.objects.filter(title=title)  # title.reviews
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user,
@@ -83,14 +85,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        review = get_object_or_404(Reviews, pk=self.kwargs.get("review_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
         return Comment.objects.filter(title=title, review=review)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user,
                         title=get_object_or_404(Title,
                                                 pk=self.kwargs["title_id"]),
-                        review=get_object_or_404(Reviews,
+                        review=get_object_or_404(Review,
                                                  pk=self.kwargs["review_id"])
                         )
 
