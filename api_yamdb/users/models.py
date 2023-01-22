@@ -15,7 +15,7 @@ class User(AbstractUser):
 
     email = models.EmailField(
         'Эл. адрес',
-        max_length=253,
+        max_length=254,
         db_index=True,
         unique=True,
     )
@@ -31,13 +31,17 @@ class User(AbstractUser):
         default='user',
 
     )
+    first_name = models.CharField(max_length=150, blank=True, verbose_name='Имя пользователя')
+    last_name = models.CharField(max_length=150, blank=True, verbose_name='Фамилия пользователя')
+
 
     def __str__(self):
         return self.username
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser or self.is_staff
+        return self.role == self.ADMIN or self.is_superuser
+               # or self.is_staff
 
     @property
     def is_moderator(self):

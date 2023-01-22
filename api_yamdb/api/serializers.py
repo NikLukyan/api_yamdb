@@ -8,7 +8,7 @@ from users.models import User
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        # fields = '__all__'
+
         model = Genre
         exclude = ['id']
 
@@ -16,7 +16,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        # fields = '__all__'
+
         model = Category
         exclude = ['id']
 
@@ -90,32 +90,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-# class FollowSerializer(serializers.ModelSerializer):
-#     user = SlugRelatedField(
-#         read_only=True, slug_field='username',
-#         default=serializers.CurrentUserDefault()
-#     )
-#     following = SlugRelatedField(
-#         queryset=User.objects.all(),
-#         slug_field='username'
-#     )
-#
-#     class Meta:
-#         model = Follow
-#         fields = ('user', 'following')
-#         validators = (
-#             UniqueTogetherValidator(
-#                 queryset=Follow.objects.all(),
-#                 fields=('user', 'following'),
-#                 message='Вы уже подписаны на этого автора.'
-#             ),
-#         )
-#
-#     def validate_following(self, value):
-#         if self.context['request'].user == value:
-#             raise serializers.ValidationError(
-#                 'Нельзя подписаться на себя.')
-#         return value
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор для создания пользователя"""
@@ -129,13 +103,15 @@ class SignUpSerializer(serializers.ModelSerializer):
                 'Использовать имя "me" запрещено!'
             )
 
-        email = value.get('email')
+        # email = value.get('email')
+        email = self.validated_data['email']
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError(
                 f'Пользователь с email \'{email}\' уже существует.'
             )
         
-        username = value.get('username')
+        # username = value.get('username')
+        username = self.validated_data['username']
         if User.objects.filter(username=username).exists():
             raise serializers.ValidationError(
                 f'Пользователь \'{username}\' уже существует.'
@@ -175,3 +151,4 @@ class JWTTokenAPIViewSerializer(serializers.ModelSerializer):
         password = self.context['request'].data.get('confirmation_code')
         attrs['password'] = password
         return super().validate(attrs)
+
