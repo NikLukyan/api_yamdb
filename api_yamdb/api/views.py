@@ -1,34 +1,35 @@
-from django.conf import settings
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from django.core.mail import send_mail
-from rest_framework.pagination import LimitOffsetPagination, \
-    PageNumberPagination
-from reviews.models import Category, Genre, Title, Review, Comment
-from rest_framework import filters
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
-from api.permissions import IsAdminUserOrReadOnly
-from .permissions import IsAuthorOrAdminOrModeratorOrReadOnly
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import (
+    LimitOffsetPagination,
+    PageNumberPagination,
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from api.permissions import (
+    IsAdmin,
+    IsAdminUserOrReadOnly,
+    IsAuthorOrAdminOrModeratorOrReadOnly,
+)
 from api.serializers import (
-    GenreSerializer,
     CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    JWTTokenAPIViewSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
-    ReviewSerializer,
-    CommentSerializer
+    UserSerializer,
 )
-
-
-from .serializers import UserSerializer, JWTTokenAPIViewSerializer, \
-    SignUpSerializer
-from .permissions import IsAdmin
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from users.utils import generate_and_send_confrimation_code
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -144,22 +145,19 @@ class SignUpAPIView(APIView):
     """регистрация пользователя"""
     permission_classes = (AllowAny,)
 
-    def signup(request):
-        serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['username']
-        email = serializer.validated_data['email']
-        user, _ = User.objects.get_or_create(email=email, username=username)
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            '',
-            confirmation_code,
-            settings.EMAIL_ADMIN,
-            [email],
-            fail_silently=False
+    def post(self, request):
+        """Создание пользователя и отправка кода подтверждения."""
+        serializer = SignUpSerializer(data=self.request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            generate_and_send_confrimation_code(
+                user=user,
+                data=serializer.data
+            )
+            return Response(
+                serializer.data,status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
         )
-        response = {
-            'email': email,
-            'username': username
-        }
-        return Response(response, status=status.HTTP_200_OK)
