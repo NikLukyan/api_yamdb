@@ -1,6 +1,7 @@
 from django.db.models import Avg
 from rest_framework import serializers
 
+from api.validators import UserDataValidation
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -117,33 +118,17 @@ class CommentSerializer(serializers.ModelSerializer):
 #                 'Нельзя подписаться на себя.')
 #         return value
 
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer,  UserDataValidation):
     """Сериализатор для создания пользователя"""
+    username = serializers.CharField(required=True, max_length=150)
+    email = serializers.EmailField(required=True, max_length=150)
+
     class Meta:
         fields = ('email', 'username')
         model = User
-    
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя "me" запрещено!'
-            )
-
-        email = value.get('email')
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                f'Пользователь с email \'{email}\' уже существует.'
-            )
-        
-        username = value.get('username')
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError(
-                f'Пользователь \'{username}\' уже существует.'
-            )
-        return value
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer, UserDataValidation):
     """Сериализатор модели User"""
     class Meta:
         model = User
@@ -155,23 +140,12 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-    def validate_role(self, role):
-        req_user = self.context['request'].user
-        user = User.objects.get(username=req_user)
-        if user.is_user:
-            role = user.role
-        return role
 
-
-class JWTTokenAPIViewSerializer(serializers.ModelSerializer):
+class JWTTokenAPIViewSerializer(serializers.ModelSerializer, UserDataValidation):
     "Сериализатор данных для получения JWT токена"
-    username_field = User.email
+    username = serializers.CharField(required=True, max_length=150)
+    confirmation_code = serializers.CharField(required=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['password'].required = False
 
-    def validate(self, attrs):
-        password = self.context['request'].data.get('confirmation_code')
-        attrs['password'] = password
-        return super().validate(attrs)
+class ProfileSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
