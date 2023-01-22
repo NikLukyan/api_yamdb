@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from .validators import UsernameValidator
 
 
 class User(AbstractUser):
@@ -13,12 +12,14 @@ class User(AbstractUser):
         ('MODERATOR', 'moderator'),
         ('ADMIN', 'admin'),
     ]
+
     email = models.EmailField(
         'Эл. адрес',
         max_length=253,
         db_index=True,
         unique=True,
     )
+
     bio = models.TextField(
         'Биография',
         blank=True,
@@ -31,7 +32,6 @@ class User(AbstractUser):
 
     )
 
-    
     def __str__(self):
         return self.username
 
