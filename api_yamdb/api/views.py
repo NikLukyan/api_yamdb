@@ -10,9 +10,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Reviews, Title
-from users.models import User
-from users.utils import generate_and_send_confrimation_code
 
 from api.permissions import (
     IsAdmin,
@@ -30,6 +27,9 @@ from api.serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
+from users.utils import generate_and_send_confrimation_code
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -71,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return Reviews.objects.filter(title=title)  # title.reviews
+        return Review.objects.filter(title=title)  # title.reviews
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user,
@@ -86,14 +86,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        review = get_object_or_404(Reviews, pk=self.kwargs.get("review_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
         return Comment.objects.filter(title=title, review=review)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user,
                         title=get_object_or_404(Title,
                                                 pk=self.kwargs["title_id"]),
-                        review=get_object_or_404(Reviews,
+                        review=get_object_or_404(Review,
                                                  pk=self.kwargs["review_id"])
                         )
 

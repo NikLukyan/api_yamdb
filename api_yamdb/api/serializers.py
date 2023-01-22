@@ -1,4 +1,8 @@
+from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
+
 from reviews.models import Category, Comment, Genre, Reviews, Title
 from users.models import User
 
@@ -25,10 +29,22 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = ('id',
+                  'name',
+                  'year',
+                  'rating',
+                  'description',
+                  'genre',
+                  'category')
         model = Title
+
+    def get_rating(self, obj):
+        return (Review.objects.filter(title=obj).
+                aggregate(Avg('score')).
+                get("score__avg"))
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -55,7 +71,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        model = Reviews
+        model = Review
         # validators = (UniqueTogetherValidator(
         #     queryset=Reviews.objects.all(),
         #     fields=('author', 'title'),
@@ -74,8 +90,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
-
-
 
 
 # class FollowSerializer(serializers.ModelSerializer):
@@ -104,8 +118,6 @@ class CommentSerializer(serializers.ModelSerializer):
 #             raise serializers.ValidationError(
 #                 'Нельзя подписаться на себя.')
 #         return value
-
-
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор для создания пользователя"""
