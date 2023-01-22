@@ -1,9 +1,6 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueTogetherValidator
-
-from reviews.models import Genre, Category, Title, Reviews, Comment
-from users.models import User, ConfirmationCode
+from reviews.models import Category, Comment, Genre, Reviews, Title
+from users.models import User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -168,21 +165,3 @@ class JWTTokenAPIViewSerializer(serializers.ModelSerializer):
         password = self.context['request'].data.get('confirmation_code')
         attrs['password'] = password
         return super().validate(attrs)
-
-
-class ConfirmationCodeSerializer(serializers.Serializer):
-    confirmation_code = serializers.SlugRelatedField(
-        slug_field='confirmation_code',
-        many=False,
-        read_only=True
-    )
-    email = serializers.SlugRelatedField(
-        slug_field='email',
-        many=False,
-        read_only=True
-    )
-    code_date = serializers.DateTimeField()
-
-    class Meta:
-        fields = '__all__'
-        model = ConfirmationCode
