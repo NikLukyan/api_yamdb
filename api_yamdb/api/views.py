@@ -105,6 +105,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdmin, )
     search_fields = ('=username', )
     lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
     
     @action(
         methods=['GET', 'PATCH'],

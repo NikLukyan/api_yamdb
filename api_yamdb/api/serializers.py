@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Category, Comment, Genre, Reviews, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
