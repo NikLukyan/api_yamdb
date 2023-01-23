@@ -2,46 +2,65 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+ROLE_CHOICES = [
+    ('user', 'Пользователь'),
+    ('moderator', 'Модератор'),
+    ('admin', 'Администратор'),
+]
 
 class User(AbstractUser):
-    USER = 'user'
-    MODERATOR = 'moderator'
     ADMIN = 'admin'
-    ROLE_CHOICES = [
-        ('USER', 'user'),
-        ('MODERATOR', 'moderator'),
-        ('ADMIN', 'admin'),
-    ]
+    MODERATOR = 'moderator'
+    USER = 'user'
 
+    username = models.CharField(
+        db_index=True,
+        max_length=150,
+        unique=True,
+        verbose_name='Логин пользователя',
+    )
     email = models.EmailField(
-        'Эл. адрес',
-        max_length=254,
         db_index=True,
         unique=True,
+        verbose_name='Почтовый адрес',
     )
-
-    bio = models.TextField(
-        'Биография',
+    first_name = models.CharField(
+        max_length=150,
         blank=True,
+        null=True,
+        verbose_name='Имя пользователя',
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name='Фамилия пользователя',
+    )
+    bio = models.TextField(
+        blank=True,
+        verbose_name='Биография пользователя',
     )
     role = models.CharField(
-        'Роль',
-        choices=ROLE_CHOICES,
         max_length=10,
+        choices=ROLE_CHOICES,
         default='user',
-
+        verbose_name='Текущая роль пользователя',
     )
-    first_name = models.CharField(max_length=150, blank=True, verbose_name='Имя пользователя')
-    last_name = models.CharField(max_length=150, blank=True, verbose_name='Фамилия пользователя')
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
+        """Строковое представление модели."""
         return self.username
 
     @property
     def is_admin(self):
         return self.role == self.ADMIN or self.is_superuser
-               # or self.is_staff
 
     @property
     def is_moderator(self):
@@ -50,14 +69,3 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == self.USER
-    
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-
-
-class ConfirmationCode(models.Model):
-    confirmation_code = models.CharField(max_length=32)
-    email = models.EmailField(max_length=254, unique=True)
-    code_date = models.DateTimeField(auto_now_add=True)
