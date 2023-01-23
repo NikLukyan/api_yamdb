@@ -4,7 +4,7 @@ from django.db.models import Avg
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import generics, filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import (
     LimitOffsetPagination,
@@ -12,81 +12,30 @@ from rest_framework.pagination import (
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
+from api.confirmation import get_tokens_for_user, send_email
 from api.filters import TitleFilter
 from api.permissions import (
-    IsAdminUserOrReadOnly,
-    IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin,
+    IsAdminOrReadOnly,
+    AuthorAndStaffOrReadOnly, IsAdmin,
 )
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
     JWTTokenAPIViewSerializer,
-    ProfileSerializer,
     ReviewSerializer,
     SignUpSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
     UserSerializer
 )
-from api.confirmation import get_tokens_for_user, send_email
+
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """представление для модели User"""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdmin, )
-    search_fields = ('username', )
-    lookup_field = 'username'
-    filter_backends = (filters.SearchFilter,)
-
-    @action(
-        methods=['GET', 'PATCH'],
-        detail=False,
-        permission_classes=[IsAuthenticated],
-        serializer_class=ProfileSerializer
-    )
-    def me(self, request):
-        user = request.user
-        data = request.data
-        if request.method == 'PATCH':
-            serializer = self.get_serializer(user, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=user.role, partial=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
-
-
-
-class JWTTokenAPIView(APIView):
-    """получение JWT токена для пользователя"""
-    serializer_class = JWTTokenAPIViewSerializer
-    permission_classes = (AllowAny,)
-
-    def token(self, request):
-        serializer = JWTTokenAPIViewSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(
-            User,
-            username=serializer.validated_data['username'],
-        )
-        if default_token_generator.check_token(
-                user, serializer.validated_data['confirmation_code']):
-            token = get_tokens_for_user(user)
-            return JsonResponse(
-                {'token': token['access']},
-                status=status.HTTP_200_OK,
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class SignUpAPIView(APIView):
+class SignUpAPIView(generics.CreateAPIView):
     """регистрация пользователя"""
     serializer_class = SignUpSerializer
     permission_classes = (AllowAny,)
@@ -104,10 +53,59 @@ class SignUpAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class JWTTokenAPIView(generics.CreateAPIView):
+    """получение JWT токена для пользователя"""
+    serializer_class = JWTTokenAPIViewSerializer
+    permission_classes = (AllowAny,)
+
+    def token(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(
+            User,
+            username=serializer.validated_data['username'],
+        )
+        if default_token_generator.check_token(
+                user, serializer.validated_data['confirmation_code']):
+            token = get_tokens_for_user(user)
+            return JsonResponse(
+                {'token': token['access']},
+                status=status.HTTP_200_OK,
+            )
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """представление для модели User"""
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (IsAdmin, )
+    lookup_field = 'username'
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        permission_classes=(IsAuthenticated, ),
+        url_path='me',
+        url_name='me',
+    )
+    def me(self, request, pk=None):
+        user = User.objects.get(username=request.user)
+        if request.method == 'PATCH':
+            serializer = self.serializer_class(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=request.user.role)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class GenresViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
@@ -122,7 +120,7 @@ class GenresViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'slug']
@@ -139,7 +137,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(
         Avg('reviews__score')).order_by('name')
     # queryset = Title.objects.all()
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = TitleFilter
@@ -152,7 +150,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
+    permission_classes = (AuthorAndStaffOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -175,7 +173,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrAdminOrModeratorOrReadOnly,)
+    permission_classes = (AuthorAndStaffOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):

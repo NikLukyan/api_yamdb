@@ -1,10 +1,38 @@
-from django.db.models import Avg
+import datetime as dt
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from api.validators import UserDataValidation
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+
+
+class UserSerializer(serializers.ModelSerializer, UserDataValidation):
+    """Сериализатор модели User"""
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+
+
+class SignUpSerializer(serializers.Serializer, UserDataValidation):
+    """Сериализатор для создания пользователя"""
+    username = serializers.CharField(required=True, max_length=150)
+    email = serializers.EmailField(required=True, max_length=150)
+
+
+class JWTTokenAPIViewSerializer(serializers.Serializer, UserDataValidation):
+    "Сериализатор данных для получения JWT токена"
+    username = serializers.CharField(required=True, max_length=150)
+    confirmation_code = serializers.CharField(required=True)
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -118,39 +146,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
-
-
-class SignUpSerializer(serializers.ModelSerializer, UserDataValidation):
-    """Сериализатор для создания пользователя"""
-    username = serializers.CharField(required=True, max_length=150)
-    email = serializers.EmailField(required=True, max_length=150)
-
-    class Meta:
-        fields = ('email', 'username')
-        model = User
-
-
-class UserSerializer(serializers.ModelSerializer, UserDataValidation):
-    """Сериализатор модели User"""
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role',
-        )
-
-
-class JWTTokenAPIViewSerializer(serializers.ModelSerializer,
-                                UserDataValidation):
-    "Сериализатор данных для получения JWT токена"
-    username = serializers.CharField(required=True, max_length=150)
-    confirmation_code = serializers.CharField(required=True)
-
-
-class ProfileSerializer(UserSerializer):
-    role = serializers.CharField(read_only=True)
