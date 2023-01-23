@@ -26,9 +26,16 @@ class Genre(models.Model):
 
 class Title(models.Model):
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, related_name='titles', null=True
+        Category, on_delete=models.SET_NULL, related_name='titles', null=True,
+        blank=True,
     )
-    genre = models.ManyToManyField(Genre, through='GenreTitle', verbose_name='Жанры')
+    genre = models.ManyToManyField(Genre,
+                                   # through='GenreTitle',
+                                   # through_fields=('title', 'genre'),
+                                   verbose_name='Жанры',
+                                   related_name='titles',
+                                   blank=True,
+                                   )
     description = models.TextField(verbose_name='Описание', blank=True)
     name = models.CharField(
         max_length=256,
@@ -44,9 +51,9 @@ class Title(models.Model):
         return self.name
 
 
-class GenreTitle(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+# class GenreTitle(models.Model):
+#     title = models.ForeignKey(Title, on_delete=models.CASCADE)
+#     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
     # def __str__(self):
     #     return f'Жанр - {self.genre}, произведение - {self.title}'
@@ -63,9 +70,7 @@ class Review(models.Model):
     score = models.PositiveSmallIntegerField(
         'Оценка', validators=[MinValueValidator(1), MaxValueValidator(10)],)
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
-
-
+        'Дата добавления', auto_now_add=True)
 
     def __str__(self):
         return self.text
@@ -87,7 +92,7 @@ class Comment(models.Model):
         Title, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
+        'Дата добавления', auto_now_add=True)
 
     def __str__(self):
         return self.text

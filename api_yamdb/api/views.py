@@ -1,7 +1,9 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
+from django.db.models import Avg
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import (
@@ -12,6 +14,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.filters import TitleFilter
 from api.permissions import (
     IsAdminUserOrReadOnly,
     IsAuthorOrAdminOrModeratorOrReadOnly, IsAdmin,
@@ -101,7 +104,6 @@ class SignUpAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 class GenresViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -134,12 +136,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')).order_by('name')
+    # queryset = Title.objects.all()
     permission_classes = (IsAdminUserOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = [filters.SearchFilter]
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_class = TitleFilter
     search_fields = ['name', 'category', 'slug']
-
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'list':
             return TitleReadSerializer
@@ -153,13 +157,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return Review.objects.filter(title=title)  # title.reviews
-        # return title.reviews.all()
+        # return Review.objects.filter(title=title)  # title.reviews
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user,
                         title=get_object_or_404(Title,
-                                                pk=self.kwargs["title_id"]))
+                                                pk=self.kwargs.get("title_id")))
+
+                        # title=get_object_or_404(Title,
+                        #                         pk=self.kwargs["title_id"]))
         # title = get_object_or_404(
         #     Title,
         #     id=self.kwargs.get('title_id'))
