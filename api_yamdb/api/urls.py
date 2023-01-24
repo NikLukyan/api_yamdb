@@ -1,17 +1,17 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from api.views import AuthTokenView as Auth
 from api.views import (
     CategoryViewSet,
     CommentViewSet,
     GenresViewSet,
-    JWTTokenAPIView,
     ReviewViewSet,
     SignUpAPIView,
     TitlesViewSet,
     UserViewSet,
-    AuthTokenView as Auth,
 )
+
 
 auth_urls = [
     path(r'token/', Auth.as_view(), name='auth'),

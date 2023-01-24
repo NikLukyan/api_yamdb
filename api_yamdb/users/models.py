@@ -8,6 +8,7 @@ ROLE_CHOICES = [
     ('admin', 'Администратор'),
 ]
 
+
 class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
@@ -50,7 +51,7 @@ class User(AbstractUser):
         'Код авторизации',
         max_length=15,
         blank=True,
-        null=True
+        null=True,
     )
 
     USERNAME_FIELD = 'email'
@@ -62,7 +63,9 @@ class User(AbstractUser):
 
     constraints = [
         models.UniqueConstraint(
-            fields=['username', 'email'], name='unique_user')
+            fields=['username', 'email'],
+            name='unique_user',
+        )
     ]
 
     def __str__(self):
