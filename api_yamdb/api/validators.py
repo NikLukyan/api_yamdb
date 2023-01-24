@@ -1,5 +1,5 @@
-import re
 import datetime as dt
+import re
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -32,6 +32,4 @@ class UserDataValidation:
 
 def validate_year(value):
     if value < 1900 or value > dt.datetime.now().year:
-        raise ValidationError(
-            'Не верно указан год!'
-        )
+        raise ValidationError('Не верно указан год!')
