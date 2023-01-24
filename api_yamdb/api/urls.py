@@ -10,10 +10,12 @@ from api.views import (
     SignUpAPIView,
     TitlesViewSet,
     UserViewSet,
+    AuthTokenView as Auth,
 )
 
 auth_urls = [
-    path(r'token/', JWTTokenAPIView.as_view()),
+    path(r'token/', Auth.as_view(), name='auth'),
+    # path(r'token/', JWTTokenAPIView.as_view()),
     path(r'signup/', SignUpAPIView.as_view()),
 ]
 

@@ -12,6 +12,8 @@ from rest_framework.pagination import (
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.confirmation import get_tokens_for_user, send_email
 from api.filters import TitleFilter
@@ -28,11 +30,37 @@ from api.serializers import (
     SignUpSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
-    UserSerializer
+    UserSerializer,
+    ObtainTokenSerializer
 )
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+
+
+class AuthTokenView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = ObtainTokenSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.data['username']
+            confirmation_code = serializer.data['confirmation_code']
+            user = get_object_or_404(User, username=username)
+            if confirmation_code != user.confirmation_code:
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            token = RefreshToken.for_user(user)
+            return Response(
+                {'token': str(token.access_token)},
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class SignUpAPIView(generics.CreateAPIView):
@@ -85,21 +113,33 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
     @action(
-        methods=['get', 'patch'],
+        methods=['GET', 'PATCH'],
         detail=False,
         permission_classes=(IsAuthenticated, ),
         url_path='me',
         url_name='me',
     )
     def me(self, request, pk=None):
+        serializer = UserSerializer(request.user)
         user = User.objects.get(username=request.user)
         if request.method == 'PATCH':
-            serializer = self.serializer_class(user, data=request.data, partial=True)
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            # serializer = self.serializer_class(user, data=request.data, partial=True)
+            # if serializer.is_valid():
+            #     serializer.validated_data['role'] = request.user.role
+            #     serializer.save()
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = self.get_serializer(user)
+        # serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # def put(self, request, *args, **kwargs):
+    #     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class GenresViewSet(viewsets.ModelViewSet):
