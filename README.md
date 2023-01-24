@@ -1,7 +1,7 @@
-# API_FINAL_YATUBE
+# Проект YaMDb
 ## Описание
 
-Это социальная сеть, которая даст пользователям возможность создать учетную запись, публиковать записи, подписываться на любимых авторов и отмечать понравившиеся записи.
+Проект YaMDb собирает отзывы пользователей на произведения.
 
 ## Установка
 
@@ -17,23 +17,17 @@
 - Запустить проект:
     -python manage.py runserver
 
-## Примеры 
-from django.urls import include, path  
-from rest_framework.routers import DefaultRouter  
-from .views import (
-    GroupViewSet, PostViewSet, CommentViewSet, FollowViewSet
-)
+## Документация
+- Когда вы запустите проект, по нижеуказанному адресу будет 
+доступна полная документация для API Yatube в формате Swager /api/schema/swagger-ui/ и Redoc /api/schema/redoc/
 
-router = DefaultRouter()  
-router.register('posts', PostViewSet, basename='posts')  
-router.register('groups', GroupViewSet, basename='posts')  
-router.register('follow', FollowViewSet, basename='followers')  
-router.register(
-    r'posts/(?P<post_id>\d+)/comments', CommentViewSet,
-    basename='comments'
-)  
-urlpatterns = [  
-    path('v1/', include(router.urls)),  
-    path('v1/', include('djoser.urls')),  
-    path('v1/', include('djoser.urls.jwt')),  
-]
+
+## Примеры 
+### Самостоятельная регистрация новых пользователей
+- Пользователь отправляет POST-запрос с параметрами email и username на эндпоинт /api/v1/auth/signup/. 
+- Сервис YaMDB отправляет письмо с кодом подтверждения (confirmation_code) на указанный адрес email.
+- Пользователь отправляет POST-запрос с параметрами username и confirmation_code на эндпоинт /api/v1/auth/token/, в ответе на запрос ему приходит token (JWT-токен).
+
+- В результате пользователь получает токен и может работать с API проекта, отправляя этот токен с каждым запросом. 
+После регистрации и получения токена пользователь может отправить PATCH-запрос на эндпоинт /api/v1/users/me/ и заполнить поля в своём профайле (описание полей — в документации).
+
