@@ -1,4 +1,3 @@
-
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.db.models import Avg
@@ -7,8 +6,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
+from rest_framework.pagination import (LimitOffsetPagination)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -63,7 +61,7 @@ class AuthTokenView(APIView):
 
 
 class SignUpAPIView(generics.CreateAPIView):
-    """регистрация пользователя"""
+    """Регистрация пользователя"""
     serializer_class = SignUpSerializer
     permission_classes = (AllowAny,)
 
@@ -71,17 +69,21 @@ class SignUpAPIView(generics.CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            user, _ = User.objects.get_or_create(**serializer.validated_data)
+            user, create = User.objects.get_or_create(
+                **serializer.validated_data
+            )
         except IntegrityError:
             msg = 'Пользователь с такими данными уже существует'
             return Response(msg, status=status.HTTP_400_BAD_REQUEST)
         confirmation_code = default_token_generator.make_token(user)
-        send_email(serializer.validated_data['email'], confirmation_code)
+        send_email(
+            serializer.validated_data['email'], confirmation_code
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class JWTTokenAPIView(generics.CreateAPIView):
-    """получение JWT токена для пользователя"""
+    """Получение JWT токена для пользователя"""
     serializer_class = JWTTokenAPIViewSerializer
     permission_classes = (AllowAny,)
 
@@ -93,7 +95,8 @@ class JWTTokenAPIView(generics.CreateAPIView):
             username=serializer.validated_data['username'],
         )
         if default_token_generator.check_token(
-                user, serializer.validated_data['confirmation_code']):
+            user, serializer.validated_data['confirmation_code']
+        ):
             token = get_tokens_for_user(user)
             return JsonResponse(
                 {'token': token['access']},
@@ -103,23 +106,23 @@ class JWTTokenAPIView(generics.CreateAPIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """представление для модели User"""
+    """Представление для модели User"""
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    permission_classes = (IsAdmin, )
+    permission_classes = (IsAdmin,)
     lookup_field = 'username'
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['GET', 'PATCH'],
         detail=False,
-        permission_classes=(IsAuthenticated, ),
+        permission_classes=(IsAuthenticated,),
         url_path='me',
         url_name='me',
     )
-    def me(self, request, pk=None):
+    def me(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
             serializer = UserSerializer(
@@ -129,8 +132,12 @@ class UserViewSet(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.data, status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.data, status=status.HTTP_200_OK
+        )
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -142,10 +149,14 @@ class GenresViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -158,10 +169,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -170,9 +185,12 @@ class TitlesViewSet(viewsets.ModelViewSet):
     ).order_by('name')
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (
+        DjangoFilterBackend, filters.SearchFilter
+    )
     filterset_class = TitleFilter
     search_fields = ['name', 'category', 'slug']
+
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'list':
             return TitleReadSerializer
@@ -182,10 +200,11 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (AuthorAndStaffOrReadOnly,)
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        title = get_object_or_404(
+            Title, pk=self.kwargs.get("title_id")
+        )
         return title.reviews.all()
 
     def perform_create(self, serializer):
@@ -201,16 +220,26 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AuthorAndStaffOrReadOnly,)
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
-        return Comment.objects.filter(title=title, review=review)
+        title = get_object_or_404(
+            Title, pk=self.kwargs.get("title_id")
+        )
+        review = get_object_or_404(
+            Review, pk=self.kwargs.get("review_id")
+        )
+        return Comment.objects.filter(
+            title=title,
+            review=review
+        )
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            title=get_object_or_404(Title,pk=self.kwargs["title_id"]),
-            review=get_object_or_404(Review, pk=self.kwargs["review_id"]),
+            title=get_object_or_404(
+                Title, pk=self.kwargs["title_id"]
+            ),
+            review=get_object_or_404(
+                Review, pk=self.kwargs["review_id"]
+            ),
         )

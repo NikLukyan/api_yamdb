@@ -1,4 +1,8 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+)
+
 from django.db import models
 
 from api.validators import validate_year
@@ -23,7 +27,10 @@ class Genre(models.Model):
 
 class Title(models.Model):
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, related_name='titles', null=True,
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        null=True,
         blank=True,
     )
     genre = models.ManyToManyField(
@@ -32,7 +39,10 @@ class Title(models.Model):
         related_name='titles',
         blank=True,
     )
-    description = models.TextField(verbose_name='Описание', blank=True)
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True
+    )
     name = models.CharField(
         max_length=256,
         verbose_name='Название',
@@ -61,7 +71,7 @@ class Review(models.Model):
     score = models.PositiveSmallIntegerField(
         'Оценка',
         validators=[MinValueValidator(1),
-        MaxValueValidator(10)],
+                    MaxValueValidator(10)],
     )
     pub_date = models.DateTimeField(
         'Дата добавления',
