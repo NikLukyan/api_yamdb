@@ -46,6 +46,12 @@ class User(AbstractUser):
         default='user',
         verbose_name='Текущая роль пользователя',
     )
+    confirmation_code = models.CharField(
+        'Код авторизации',
+        max_length=15,
+        blank=True,
+        null=True
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -53,6 +59,11 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=['username', 'email'], name='unique_user')
+    ]
 
     def __str__(self):
         """Строковое представление модели."""
