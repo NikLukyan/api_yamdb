@@ -1,6 +1,3 @@
-import datetime as dt
-
-
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -45,6 +42,7 @@ class UserSerializer(serializers.ModelSerializer, UserDataValidation):
 
 class SignUpSerializer(serializers.Serializer, UserDataValidation):
     """Сериализатор для создания пользователя"""
+
     username = serializers.CharField(required=True, max_length=150)
     email = serializers.EmailField(required=True, max_length=150)
 
@@ -56,14 +54,12 @@ class JWTTokenAPIViewSerializer(serializers.Serializer, UserDataValidation):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Genre
         exclude = ['id']
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Category
         exclude = ['id']
@@ -109,8 +105,10 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(read_only=True,
-                                          slug_field='username')
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
@@ -136,7 +134,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True,
+        slug_field='username'
     )
 
     class Meta:
