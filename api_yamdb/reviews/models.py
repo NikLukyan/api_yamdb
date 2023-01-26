@@ -5,21 +5,42 @@ from django.core.validators import (
 
 from django.db import models
 
-from api.validators import validate_year
+from api.v1.validators import validate_year
 from users.models import User
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Категория',
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Слаг категории',
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.slug
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=15)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Жанр',
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Слаг жанра',
+    )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.slug
@@ -35,7 +56,9 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        verbose_name='Жанры',
+        through='GenreTitle',
+        through_fields=('title', 'genre'),
+        verbose_name='Жанр',
         related_name='titles',
         blank=True,
     )
@@ -48,12 +71,23 @@ class Title(models.Model):
         verbose_name='Название',
         help_text='Введите название произведения',
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год выпуска',
-        validators=[validate_year])
+        validators=[MinValueValidator(1900),
+                    validate_year])
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+
+class GenreTitle(models.Model):
+    """Модель отношения Произведение-Жанр"""
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
@@ -84,10 +118,12 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'],
+                fields=['author_id', 'title_id'],
                 name='unique_review',
             )
         ]
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
 
 
 class Comment(models.Model):
@@ -101,11 +137,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
     )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='comments',
-    )
     text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
         'Дата добавления',
@@ -114,3 +145,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
