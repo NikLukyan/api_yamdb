@@ -1,10 +1,10 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 from api.v1.validators import validate_username
+
 
 class ObtainTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=50, required=True)
@@ -30,13 +30,13 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-
 class SignUpSerializer(serializers.Serializer):
     """Сериализатор для создания пользователя"""
 
-    username = serializers.CharField(required=True, max_length=150, validators=[validate_username])
+    username = serializers.CharField(required=True,
+                                     max_length=150,
+                                     validators=[validate_username])
     email = serializers.EmailField(required=True, max_length=150)
-
 
 
 class GenreSerializer(serializers.ModelSerializer):
