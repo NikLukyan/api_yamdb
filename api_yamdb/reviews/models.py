@@ -5,7 +5,7 @@ from django.core.validators import (
 
 from django.db import models
 
-from api.validators import validate_year
+from api.v1.validators import validate_year
 from users.models import User
 
 
