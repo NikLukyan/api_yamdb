@@ -30,7 +30,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=15,
+        max_length=100,
         verbose_name='Жанр',
     )
     slug = models.SlugField(
@@ -71,9 +71,10 @@ class Title(models.Model):
         verbose_name='Название',
         help_text='Введите название произведения',
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год выпуска',
-        validators=[validate_year])
+        validators=[MinValueValidator(1900),
+                    validate_year])
 
     def __str__(self):
         return self.name

@@ -32,7 +32,7 @@ class Command(BaseCommand):
         csv_reader = get_reader('genre.csv')
         next(csv_reader, None)
         for row in csv_reader:
-            obj, created = Genre.objects.get_or_create(
+            Genre.objects.get_or_create(
                 id=row[0],
                 name=row[1],
                 slug=row[2]
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         next(csv_reader, None)
         for row in csv_reader:
             obj_category = get_object_or_404(Category, id=row[3])
-            obj, created = Title.objects.get_or_create(
+            Title.objects.get_or_create(
                 id=row[0],
                 name=row[1],
                 year=row[2],
