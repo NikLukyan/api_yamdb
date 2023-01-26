@@ -6,8 +6,8 @@ from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
 
 from reviews.models import (Category, Comment, Genre, Review,
-                            Title, User)
-# GenreTitle
+                            Title, User, GenreTitle)
+
 
 def get_reader(file_name: str):
     csv_path = os.path.join(settings.BASE_DIR, 'static/data/', file_name)
@@ -51,17 +51,17 @@ class Command(BaseCommand):
             )
         print('titles - OK')
 
-        # csv_reader = get_reader('genre_title.csv')
-        # next(csv_reader, None)
-        # for row in csv_reader:
-        #     obj_genre = get_object_or_404(Genre, id=row[2])
-        #     obj_title = get_object_or_404(Title, id=row[1])
-        #     obj, created = GenreTitle.objects.get_or_create(
-        #         id=row[0],
-        #         genre=obj_genre,
-        #         title=obj_title
-        #     )
-        # print('genre_titles - OK')
+        csv_reader = get_reader('genre_title.csv')
+        next(csv_reader, None)
+        for row in csv_reader:
+            obj_genre = get_object_or_404(Genre, id=row[2])
+            obj_title = get_object_or_404(Title, id=row[1])
+            obj, created = GenreTitle.objects.get_or_create(
+                id=row[0],
+                title_id=obj_title.id,
+                genre_id=obj_genre.id,
+            )
+        print('genre_titles - OK')
 
         csv_reader = get_reader('users.csv')
         next(csv_reader, None)
@@ -84,7 +84,7 @@ class Command(BaseCommand):
             obj_user = get_object_or_404(User, id=row[3])
             obj, created = Review.objects.get_or_create(
                 id=row[0],
-                title=obj_title,
+                title_id=obj_title.id,
                 text=row[2],
                 author=obj_user,
                 score=row[4],
@@ -99,7 +99,7 @@ class Command(BaseCommand):
             obj_user = get_object_or_404(User, id=row[3])
             obj, created = Comment.objects.get_or_create(
                 id=row[0],
-                review=obj_review,
+                review_id=obj_review.id,
                 text=row[2],
                 author=obj_user,
                 pub_date=row[4]

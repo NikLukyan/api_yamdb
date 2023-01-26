@@ -136,11 +136,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
     )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='comments',
-    )
     text = models.TextField('Текст комментария')
     pub_date = models.DateTimeField(
         'Дата добавления',
