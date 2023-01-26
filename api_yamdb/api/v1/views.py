@@ -12,14 +12,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.confirmation import get_tokens_for_user, send_email
-from api.filters import TitleFilter
-from api.permissions import (
+from api.v1.confirmation import get_tokens_for_user, send_email
+from api.v1.filters import TitleFilter
+from api.v1.permissions import (
     AuthorAndStaffOrReadOnly,
     IsAdmin,
     IsAdminOrReadOnly
 )
-from api.serializers import (
+from api.v1.serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
@@ -203,7 +203,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(
-            Title, pk=self.kwargs.get("title_id")
+            Title, id=self.kwargs.get('title_id')
         )
         return title.reviews.all()
 
@@ -212,7 +212,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=get_object_or_404(
                 Title,
-                pk=self.kwargs.get("title_id"),
+                id=self.kwargs.get('title_id'),
             ),
         )
 
@@ -222,16 +222,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorAndStaffOrReadOnly,)
 
     def get_queryset(self):
-        title = get_object_or_404(
-            Title, pk=self.kwargs.get("title_id")
-        )
         review = get_object_or_404(
-            Review, pk=self.kwargs.get("review_id")
+            Review,
+            id=self.kwargs.get("review_id"),
+            title__id=self.kwargs.get("title_id")
         )
-        return Comment.objects.filter(
-            title=title,
-            review=review
-        )
+        return Comment.objects.filter(review=review)
 
     def perform_create(self, serializer):
         serializer.save(

@@ -1,7 +1,8 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api.validators import UserDataValidation
+from api.v1.validators import UserDataValidation
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -125,11 +126,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Можно оставлять только один отзыв!'
             )
         return data
-
-    def validate_score(self, value):
-        if value < 1 or value > 10:
-            raise serializers.ValidationError('Недопустимое значение!')
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
