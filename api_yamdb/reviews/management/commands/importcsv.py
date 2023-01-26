@@ -22,7 +22,7 @@ class Command(BaseCommand):
         csv_reader = get_reader('category.csv')
         next(csv_reader, None)
         for row in csv_reader:
-            obj, created = Category.objects.get_or_create(
+            Category.objects.get_or_create(
                 id=row[0],
                 name=row[1],
                 slug=row[2]
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         for row in csv_reader:
             obj_genre = get_object_or_404(Genre, id=row[2])
             obj_title = get_object_or_404(Title, id=row[1])
-            obj, created = GenreTitle.objects.get_or_create(
+            GenreTitle.objects.get_or_create(
                 id=row[0],
                 title_id=obj_title.id,
                 genre_id=obj_genre.id,
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         csv_reader = get_reader('users.csv')
         next(csv_reader, None)
         for row in csv_reader:
-            obj, created = User.objects.get_or_create(
+            User.objects.get_or_create(
                 id=row[0],
                 username=row[1],
                 email=row[2],
@@ -82,7 +82,7 @@ class Command(BaseCommand):
         for row in csv_reader:
             obj_title = get_object_or_404(Title, id=row[1])
             obj_user = get_object_or_404(User, id=row[3])
-            obj, created = Review.objects.get_or_create(
+            Review.objects.get_or_create(
                 id=row[0],
                 title_id=obj_title.id,
                 text=row[2],
@@ -97,7 +97,7 @@ class Command(BaseCommand):
         for row in csv_reader:
             obj_review = get_object_or_404(Review, id=row[1])
             obj_user = get_object_or_404(User, id=row[3])
-            obj, created = Comment.objects.get_or_create(
+            Comment.objects.get_or_create(
                 id=row[0],
                 review_id=obj_review.id,
                 text=row[2],
