@@ -27,7 +27,7 @@ python manage.py migrate
 ```
 - Наполнить пустую БД тестовыми данными из подготовленных заранее csv файлов можно с помощью команды:
 ```
-python manage.py import
+python manage.py importcsv
 ```
 - Запустить проект:
 ```
