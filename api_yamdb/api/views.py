@@ -203,7 +203,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_or_404(
-            Title, pk=self.kwargs.get("title_id")
+            Title, id=self.kwargs.get('title_id')
         )
         return title.reviews.all()
 
@@ -212,7 +212,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=get_object_or_404(
                 Title,
-                pk=self.kwargs.get("title_id"),
+                id=self.kwargs.get('title_id'),
             ),
         )
 

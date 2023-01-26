@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 
-from reviews.management import commands
+# from reviews.management import commands
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_filters',
-    'commands'
     'djoser',
     'users',
     'api',
