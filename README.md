@@ -7,27 +7,60 @@
 
 - Клонировать  репозиторий и перейти в него в командной строке
 - Cоздать и активировать виртуальное окружение:
-    -python -m venv env
-    -source env/bin/activate
-    -python -m pip install --upgrade pip
+```
+python -m venv env
+```
+```
+source env/bin/activate
+```
+```
+python -m pip install --upgrade pip
+```
 - Установить зависимости из файла requirements.txt:
-    -pip install -r requirements.txt
-- Выполнить миграции:
-   -python manage.py migrate
-- Запустить проект:
-    -python manage.py runserver
+```
+pip install -r requirements.txt
+```
 
+- Выполнить миграции:
+```
+python manage.py migrate
+```
+- Наполнить пустую БД тестовыми данными из подготовленных заранее csv файлов можно с помощью команды:
+```
+python manage.py importcsv
+```
+- Запустить проект:
+```
+python manage.py runserver
+```
 ## Документация
 - Когда вы запустите проект, по нижеуказанному адресу будет 
-доступна полная документация для API Yatube в формате Swager /api/schema/swagger-ui/ и Redoc /api/schema/redoc/
-
+доступна полная документация для API YaMDb в формате Swager 
+```
+/api/schema/swagger-ui/ 
+```
+и Redoc 
+```
+/api/schema/redoc/
+```
 
 ## Примеры 
 ### Самостоятельная регистрация новых пользователей
-- Пользователь отправляет POST-запрос с параметрами email и username на эндпоинт /api/v1/auth/signup/. 
+- Пользователь отправляет POST-запрос с параметрами email и username на эндпоинт 
+```
+/api/v1/auth/signup/
+``` 
 - Сервис YaMDB отправляет письмо с кодом подтверждения (confirmation_code) на указанный адрес email.
-- Пользователь отправляет POST-запрос с параметрами username и confirmation_code на эндпоинт /api/v1/auth/token/, в ответе на запрос ему приходит token (JWT-токен).
+- Пользователь отправляет POST-запрос с параметрами username и confirmation_code на эндпоинт 
+```
+/api/v1/auth/token/
+```
+- В ответе на запрос ему приходит token (JWT-токен).
 
 - В результате пользователь получает токен и может работать с API проекта, отправляя этот токен с каждым запросом. 
-После регистрации и получения токена пользователь может отправить PATCH-запрос на эндпоинт /api/v1/users/me/ и заполнить поля в своём профайле (описание полей — в документации).
+После регистрации и получения токена пользователь может отправить PATCH-запрос на эндпоинт
+```
+/api/v1/users/me/
+```
+и заполнить поля в своём профайле (описание полей — в документации).
 
