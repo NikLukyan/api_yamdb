@@ -2,21 +2,20 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api.v1.validators import UserDataValidation
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from api.v1.validators import validate_username
 
-
-class ObtainTokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=50)
-    confirmation_code = serializers.CharField(max_length=15)
+class ObtainTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=50, required=True)
+    confirmation_code = serializers.CharField(max_length=15, required=True)
 
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
 
 
-class UserSerializer(serializers.ModelSerializer, UserDataValidation):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор модели User"""
 
     class Meta:
@@ -30,28 +29,14 @@ class UserSerializer(serializers.ModelSerializer, UserDataValidation):
             'role',
         )
 
-    def validate(self, data):
-        """Валидируем, что пользователь не будет использовать
-           никнейм, конфликтующий с эндпоинтом.
-        """
-        if data.get('username') != 'me':
-            return data
-        raise serializers.ValidationError(
-            'Невозможное имя пользователя'
-        )
 
 
-class SignUpSerializer(serializers.Serializer, UserDataValidation):
+class SignUpSerializer(serializers.Serializer):
     """Сериализатор для создания пользователя"""
 
-    username = serializers.CharField(required=True, max_length=150)
+    username = serializers.CharField(required=True, max_length=150, validators=[validate_username])
     email = serializers.EmailField(required=True, max_length=150)
 
-
-class JWTTokenAPIViewSerializer(serializers.Serializer, UserDataValidation):
-    "Сериализатор данных для получения JWT токена"
-    username = serializers.CharField(required=True, max_length=150)
-    confirmation_code = serializers.CharField(required=True)
 
 
 class GenreSerializer(serializers.ModelSerializer):

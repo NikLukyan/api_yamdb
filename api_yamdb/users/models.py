@@ -1,23 +1,23 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-ROLE_CHOICES = [
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-]
+from api.v1.validators import validate_username
+
+
+class UserRole(models.TextChoices):
+    USER = 'user', 'Пользователь'
+    MODERATOR = 'moderator', 'Модератор'
+    ADMIN = 'admin', 'Администратор'
 
 
 class User(AbstractUser):
-    ADMIN = 'admin'
-    MODERATOR = 'moderator'
-    USER = 'user'
-
     username = models.CharField(
         db_index=True,
         max_length=150,
         unique=True,
         verbose_name='Логин пользователя',
+        validators=[UnicodeUsernameValidator, validate_username]
     )
     email = models.EmailField(
         db_index=True,
@@ -41,10 +41,10 @@ class User(AbstractUser):
         verbose_name='Биография пользователя',
     )
     role = models.CharField(
-        max_length=10,
-        choices=ROLE_CHOICES,
-        default='user',
-        verbose_name='Текущая роль пользователя',
+        max_length=16,
+        choices=UserRole.choices,
+        default=UserRole.USER,
+        verbose_name='Роль',
     )
     confirmation_code = models.CharField(
         'Код авторизации',
@@ -60,12 +60,6 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
-    constraints = [
-        models.UniqueConstraint(
-            fields=['username', 'email'],
-            name='unique_user',
-        )
-    ]
 
     def __str__(self):
         """Строковое представление модели."""
@@ -73,12 +67,12 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_superuser
+        return self.role == UserRole.ADMIN or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR
+        return self.role == UserRole.MODERATOR
 
     @property
     def is_user(self):
-        return self.role == self.USER
+        return self.role == UserRole.USER
