@@ -1,7 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.db.models import Avg
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status, viewsets
@@ -12,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.v1.confirmation import get_tokens_for_user, send_email
+from api.v1.confirmation import send_email
 from api.v1.filters import TitleFilter
 from api.v1.permissions import (
     AuthorAndStaffOrReadOnly,
@@ -23,7 +22,6 @@ from api.v1.serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
-    JWTTokenAPIViewSerializer,
     ObtainTokenSerializer,
     ReviewSerializer,
     SignUpSerializer,
@@ -31,7 +29,7 @@ from api.v1.serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 
@@ -80,29 +78,6 @@ class SignUpAPIView(generics.CreateAPIView):
             serializer.validated_data['email'], confirmation_code
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class JWTTokenAPIView(generics.CreateAPIView):
-    """Получение JWT токена для пользователя"""
-    serializer_class = JWTTokenAPIViewSerializer
-    permission_classes = (AllowAny,)
-
-    def token(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(
-            User,
-            username=serializer.validated_data['username'],
-        )
-        if default_token_generator.check_token(
-            user, serializer.validated_data['confirmation_code']
-        ):
-            token = get_tokens_for_user(user)
-            return JsonResponse(
-                {'token': token['access']},
-                status=status.HTTP_200_OK,
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -228,4 +203,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
         serializer.save(author=self.request.user, review=review)
-
