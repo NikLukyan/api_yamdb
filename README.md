@@ -19,7 +19,7 @@
 
 ## Документация
 - Когда вы запустите проект, по нижеуказанному адресу будет 
-доступна полная документация для API Yatube в формате Swager /api/schema/swagger-ui/ и Redoc /api/schema/redoc/
+доступна полная документация для API YaMDb в формате Swager /api/schema/swagger-ui/ и Redoc /api/schema/redoc/
 
 
 ## Примеры 
