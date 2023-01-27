@@ -1,8 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from api.v1.views import AuthTokenView as Auth
-from api.v1.views import (
+from .views import AuthTokenView as Auth
+from .views import (
     CategoryViewSet,
     CommentViewSet,
     GenresViewSet,

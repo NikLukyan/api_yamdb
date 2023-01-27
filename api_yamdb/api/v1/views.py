@@ -11,14 +11,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.v1.confirmation import send_email
-from api.v1.filters import TitleFilter
-from api.v1.permissions import (
+from .confirmation import send_email
+from .filters import TitleFilter
+from .permissions import (
     AuthorAndStaffOrReadOnly,
     IsAdmin,
     IsAdminOrReadOnly
 )
-from api.v1.serializers import (
+from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
