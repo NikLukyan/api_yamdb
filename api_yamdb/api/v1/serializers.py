@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from api.v1.validators import validate_username
+from users.validators import validate_username
 
 
 class ObtainTokenSerializer(serializers.Serializer):
