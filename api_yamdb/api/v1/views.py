@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
 from .confirmation import send_email
 from .filters import TitleFilter
 from .mixins import CLDViewSet
@@ -30,8 +32,6 @@ from .serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
-from reviews.models import Category, Genre, Review, Title
-from users.models import User
 
 
 class AuthTokenView(APIView):
@@ -123,16 +123,6 @@ class GenresViewSet(CLDViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     return Response(
-    #         status=status.HTTP_405_METHOD_NOT_ALLOWED
-    #     )
-    #
-    # def update(self, request, *args, **kwargs):
-    #     return Response(
-    #         status=status.HTTP_405_METHOD_NOT_ALLOWED
-    #     )
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
