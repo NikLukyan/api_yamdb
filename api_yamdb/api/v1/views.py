@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .confirmation import send_email
 from .filters import TitleFilter
+from .mixins import CLDViewSet
 from .permissions import (
     AuthorAndStaffOrReadOnly,
     IsAdmin,
@@ -115,7 +116,7 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(CLDViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -123,15 +124,15 @@ class GenresViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
     lookup_field = 'slug'
 
-    def retrieve(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+    # def retrieve(self, request, *args, **kwargs):
+    #     return Response(
+    #         status=status.HTTP_405_METHOD_NOT_ALLOWED
+    #     )
+    #
+    # def update(self, request, *args, **kwargs):
+    #     return Response(
+    #         status=status.HTTP_405_METHOD_NOT_ALLOWED
+    #     )
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
