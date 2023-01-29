@@ -1,4 +1,3 @@
-import datetime as dt
 import re
 
 from django.core.exceptions import ValidationError
@@ -33,8 +32,3 @@ def validate_email(email):
             'Введен некорректный почтовый ящик'
         )
     return email
-
-
-def validate_year(value):
-    if value < 1900 or value > dt.datetime.now().year:
-        raise ValidationError('Не верно указан год!')

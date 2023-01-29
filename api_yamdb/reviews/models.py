@@ -5,7 +5,7 @@ from django.core.validators import (
 
 from django.db import models
 
-from api.v1.validators import validate_year
+from .validators import validate_year
 from users.models import User
 
 
@@ -94,6 +94,7 @@ class Review(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        db_constraint=False,
         related_name='reviews',
     )
     title = models.ForeignKey(

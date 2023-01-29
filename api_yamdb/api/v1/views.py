@@ -11,14 +11,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.v1.confirmation import send_email
-from api.v1.filters import TitleFilter
-from api.v1.permissions import (
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
+from .confirmation import send_email
+from .filters import TitleFilter
+from .mixins import CLDViewSet
+from .permissions import (
     AuthorAndStaffOrReadOnly,
     IsAdmin,
     IsAdminOrReadOnly
 )
-from api.v1.serializers import (
+from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
@@ -29,8 +32,6 @@ from api.v1.serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
-from reviews.models import Category, Genre, Review, Title
-from users.models import User
 
 
 class AuthTokenView(APIView):
@@ -115,23 +116,13 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(CLDViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -197,9 +188,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorAndStaffOrReadOnly,)
 
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get("review_id"),
+            title__id=self.kwargs.get("title_id")
+        )
         return review.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get("review_id"),
+            title__id=self.kwargs.get("title_id")
+        )
         serializer.save(author=self.request.user, review=review)
